@@ -64,4 +64,4 @@ pop.mundial <- pop.mundial %>% dplyr::left_join(continentes, by = c("Country_Dep
 #Vamos agrupar os dados de populacao por continente e criar uma nova variavel ?
 
 pop.mundial <- pop.mundial %>% dplyr::group_by(Continent) %>% dplyr::mutate(Population_Continent = sum(Population))
-pop.mundial %>% dplyr::group_by(Continent) %>% dplyr::summarise(Population_Continent = sum(Population))
+pop.mundial.agg <- pop.mundial %>% dplyr::group_by(Continent) %>% dplyr::summarise(Population_Continent = sum(Population))
