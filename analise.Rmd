@@ -1,0 +1,72 @@
+---
+title: "Analise Populacional"
+output: github_document
+date: "2024-02-19"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Importando bibliotecas
+
+Importe a biblioteca rvest para acessar dados web do wikipedia e processar esses dados.
+
+```{r bibliotecas, include=T, echo = T}
+library(tidyverse)
+library(rvest)
+library(data.table)
+library(knitr)
+```
+
+# Importando os dados a partir do site da wikipedia
+
+```{r importandodados, include=FALSE}
+populacao.mundial.web <- rvest::read_html("https://en.wikipedia.org/wiki/World_population")
+lpop <- populacao.mundial.web %>% rvest::html_nodes("table") %>% html_table()
+pop.mundial <- lpop[[5]]
+pop.mundial <- pop.mundial[-1,]
+```
+
+
+# Criando função auxiliar para limpar os nomes das variáveis, 
+  * tirando os espacos e; 
+  * Substituindo por "_".
+
+```{r funcoesauxiliares, include=FALSE}
+limpeza.nomes <- function(nomes)
+{
+  nomes.limpos <- gsub("__", "_", gsub("\\s","_",gsub("/", "", nomes)))
+  return(nomes.limpos)
+}
+names(pop.mundial) <- limpeza.nomes(names(pop.mundial))
+names(pop.mundial)[3] <- "Percentage_of_the_world"
+```
+
+# Selecionando as colunas úteis para analise e limpei as variáveis
+  * Limpando a variável Population para se tornar uma variável numérica
+  * Limpando a variável Percentage_of_the_world and convertendo para proporções na classe numeric
+  * Limpando a variável Date e convertendo de character para classe Date 
+
+```{r limpandovars, include=FALSE}
+pop.mundial <- pop.mundial %>% dplyr::mutate(Population = as.numeric(stringr::str_replace_all(Population, "\\,", "")))
+pop.mundial <- pop.mundial %>% dplyr::mutate(Percentage_of_the_world = as.numeric(stringr::str_replace_all(Percentage_of_the_world, "%", ""))/100)
+pop.mundial <- pop.mundial %>% dplyr::mutate(Date = as.IDate(gsub(" ", "-", Date), format = "%d-%b-%Y"))
+```
+
+# Vamos criar uma variável continente ?
+  * Importando uma base de dados que tenha a informacao de paises por continente
+  * Vinculando esta base à nossa base limpa com os dados de populacao por pais no top-10
+
+```{r limpandodadoscontinenteevinculando, echo=F, include=F}
+continentes <- readr::read_csv("dados_auxiliares/continents-according-to-our-world-in-data.csv")
+pop.mundial <- pop.mundial %>% dplyr::left_join(continentes, by = c("Country_Dependency" = "Entity"))
+```
+
+# Vamos agrupar os dados de populacao por continente e criar uma nova variavel ?
+
+```{r agrupandopopporcontinentes, echo=T, include=T}
+pop.mundial <- pop.mundial %>% dplyr::group_by(Continent) %>% dplyr::mutate(Population_Continent = sum(Population))
+pop.mundial.agg <- pop.mundial %>% dplyr::group_by(Continent) %>% dplyr::summarise(Population_Continent = sum(Population))
+kable(pop.mundial.agg)
+```
