@@ -55,6 +55,7 @@ library(data.table)
 
 ``` r
 library(knitr)
+library(RColorBrewer)
 ```
 
 # Importando os dados a partir do site da wikipedia
@@ -91,5 +92,79 @@ kable(pop.mundial.agg)
 | Africa        |            216746934 |
 | Asia          |           3514781044 |
 | Europe        |            147190000 |
-| North America |            464377230 |
-| South America |            217307635 |
+| North America |            464385084 |
+| South America |            217315913 |
+
+# Vamos construir alguns uns plots?
+
+``` r
+ggplot(pop.mundial %>% dplyr::select(Country_Dependency, Population), aes(x = Country_Dependency, y = Population)) + geom_bar(stat = "identity")
+```
+
+    ## Adding missing grouping variables: `Continent`
+
+![](analise_files/figure-gfm/plotandodadospopulacionais-1.png)<!-- -->
+
+# Quantos países temos por continente?
+
+``` r
+ggplot(pop.mundial, aes(y = Continent)) + geom_bar(stat = "count") + coord_flip()
+```
+
+![](analise_files/figure-gfm/plotando%20a%20quantidade%20de%20paises%20no%20top10%20por%20continente-1.png)<!-- -->
+
+# Será que temos algum continente que apresenta maior intervalor interquartial entre as populações no top-10?
+
+``` r
+ggplot(pop.mundial, aes(x = Continent, y = Population)) + geom_boxplot()
+```
+
+![](analise_files/figure-gfm/plotando%20a%20populacao%20por%20continente%20em%20boxplot-1.png)<!-- -->
+
+# Podemos mudar a escala
+
+``` r
+ggplot(pop.mundial, aes(x = Continent, y = Population)) + geom_boxplot() + scale_y_continuous(trans='log10')
+```
+
+![](analise_files/figure-gfm/plotando%20a%20populacao%20por%20continente%20em%20boxplot%20com%20ajuste%20de%20escala-1.png)<!-- -->
+
+# Como se distribuem os dados por continente?
+
+``` r
+ggplot(pop.mundial, aes(x = Continent, y = Population)) + geom_violin()
+```
+
+    ## Warning: Groups with fewer than two data points have been dropped.
+    ## Groups with fewer than two data points have been dropped.
+    ## Groups with fewer than two data points have been dropped.
+
+![](analise_files/figure-gfm/plotando%20a%20populacao%20por%20continente%20em%20violino%20com%20ajuste%20de%20escala-1.png)<!-- -->
+
+# Se quisermos colorir os boxplot por continente?
+
+## Vamos definir uma paleta?
+
+``` r
+pal <- pop.mundial %>% dplyr::select(Continent) %>% unique(.) %>% nrow(.) %>% brewer.pal(., name = "Accent")
+#pal <- brewer.pal(length(unique(pop.mundial$Continent)), name = "Accent")
+pal.custom <- c("#7B6B4C", "#4C507B", "#7B4C6D", "#7B4C4C", "#4C7B77")
+```
+
+## Vamos aos plotes
+
+# Com a paleta do RcolorBrewer
+
+``` r
+ggplot(pop.mundial, aes(x = Continent, y = Population, fill = Continent)) + geom_boxplot() + scale_fill_manual(values = pal)
+```
+
+![](analise_files/figure-gfm/plotando%20a%20populacao%20por%20continente%20em%20boxplot%20com%20cores%20diferentes-1.png)<!-- -->
+
+# Com a paleta customizada
+
+``` r
+ggplot(pop.mundial, aes(x = Continent, y = Population, fill = Continent)) + geom_boxplot() + scale_fill_manual(values = pal.custom)
+```
+
+![](analise_files/figure-gfm/plotando%20a%20populacao%20por%20continente%20em%20boxplot%20com%20cores%20diferentes%20e%20paleta%20customizada-1.png)<!-- -->

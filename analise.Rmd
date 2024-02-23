@@ -17,6 +17,7 @@ library(tidyverse)
 library(rvest)
 library(data.table)
 library(knitr)
+library(RColorBrewer)
 ```
 
 # Importando os dados a partir do site da wikipedia
@@ -70,3 +71,63 @@ pop.mundial <- pop.mundial %>% dplyr::group_by(Continent) %>% dplyr::mutate(Popu
 pop.mundial.agg <- pop.mundial %>% dplyr::group_by(Continent) %>% dplyr::summarise(Population_Continent = sum(Population))
 kable(pop.mundial.agg)
 ```
+
+# Vamos construir alguns uns plots?
+
+```{r plotandodadospopulacionais, echo=T, include=T}
+ggplot(pop.mundial %>% dplyr::select(Country_Dependency, Population, Continent), aes(x = Country_Dependency, y = Population, fill = Continent)) + geom_bar(stat = "identity") + xlab("Países") + ylab("População") + labs(title = "População dos países top-10 do mundo", subtitle = "Coleta web para análise com ggplot", caption = "Fonte: wikipedia") + theme_minimal()
+```
+
+# Quantos países temos por continente?
+
+```{r plotando a quantidade de paises no top10 por continente, echo = TRUE}
+ggplot(pop.mundial, aes(y = Continent)) + geom_bar(stat = "count") + coord_flip()
+```
+
+# Será que temos algum continente que apresenta maior intervalor interquartial entre as populações no top-10?
+
+```{r plotando a populacao por continente em boxplot, echo = TRUE}
+ggplot(pop.mundial, aes(x = Continent, y = Population)) + geom_boxplot()
+```
+
+# Podemos mudar a escala
+
+```{r plotando a populacao por continente em boxplot com ajuste de escala, echo = TRUE}
+ggplot(pop.mundial, aes(x = Continent, y = Population)) + geom_boxplot() + scale_y_continuous(trans='log10')
+```
+
+# Como se distribuem os dados por continente?
+
+```{r plotando a populacao por continente em violino com ajuste de escala, echo = TRUE}
+ggplot(pop.mundial, aes(x = Continent, y = Population)) + geom_violin()
+```
+
+
+# Se quisermos colorir os boxplot por continente?
+
+## Vamos definir uma paleta?
+
+```{r definindopaleta, echo=T, include=T}
+
+pal <- pop.mundial %>% dplyr::select(Continent) %>% unique(.) %>% nrow(.) %>% brewer.pal(., name = "Accent")
+#pal <- brewer.pal(length(unique(pop.mundial$Continent)), name = "Accent")
+pal.custom <- c("#7B6B4C", "#4C507B", "#7B4C6D", "#7B4C4C", "#4C7B77")
+```
+
+## Vamos aos plotes
+
+# Com a paleta do RcolorBrewer
+```{r plotando a populacao por continente em boxplot com cores diferentes, echo = TRUE}
+p1 <- ggplot(pop.mundial, aes(x = Continent, y = Population, fill = Continent)) + geom_boxplot() + scale_fill_manual(values = pal)
+```
+
+# Com a paleta customizada
+
+```{r plotando a populacao por continente em boxplot com cores diferentes e paleta customizada, echo = TRUE}
+p2 <- ggplot(pop.mundial, aes(x = Continent, y = Population, fill = Continent)) + geom_boxplot() + scale_fill_manual(values = pal.custom)
+```
+
+```{r dispersao de pontos entre divulgacao e tamanho populacional, echo = TRUE}
+ggplot(pop.mundial, aes(x = Date, y = Population, color = Continent)) + geom_point()
+```
+

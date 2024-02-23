@@ -65,3 +65,8 @@ pop.mundial <- pop.mundial %>% dplyr::left_join(continentes, by = c("Country_Dep
 
 pop.mundial <- pop.mundial %>% dplyr::group_by(Continent) %>% dplyr::mutate(Population_Continent = sum(Population))
 pop.mundial.agg <- pop.mundial %>% dplyr::group_by(Continent) %>% dplyr::summarise(Population_Continent = sum(Population))
+
+##Criando paleta de cores própria
+
+pal <- c("#2AF701", "#FC0505")
+
