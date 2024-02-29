@@ -92,16 +92,14 @@ kable(pop.mundial.agg)
 | Africa        |            216746934 |
 | Asia          |           3514781044 |
 | Europe        |            147190000 |
-| North America |            464385084 |
-| South America |            217315913 |
+| North America |            464392938 |
+| South America |            217324191 |
 
 # Vamos construir alguns uns plots?
 
 ``` r
-ggplot(pop.mundial %>% dplyr::select(Country_Dependency, Population), aes(x = Country_Dependency, y = Population)) + geom_bar(stat = "identity")
+ggplot(pop.mundial %>% dplyr::select(Country_Dependency, Population, Continent), aes(x = Country_Dependency, y = Population, fill = Continent)) + geom_bar(stat = "identity") + xlab("Países") + ylab("População") + labs(title = "População dos países top-10 do mundo", subtitle = "Coleta web para análise com ggplot", caption = "Fonte: wikipedia") + theme_minimal()
 ```
-
-    ## Adding missing grouping variables: `Continent`
 
 ![](analise_files/figure-gfm/plotandodadospopulacionais-1.png)<!-- -->
 
@@ -156,15 +154,17 @@ pal.custom <- c("#7B6B4C", "#4C507B", "#7B4C6D", "#7B4C4C", "#4C7B77")
 # Com a paleta do RcolorBrewer
 
 ``` r
-ggplot(pop.mundial, aes(x = Continent, y = Population, fill = Continent)) + geom_boxplot() + scale_fill_manual(values = pal)
+p1 <- ggplot(pop.mundial, aes(x = Continent, y = Population, fill = Continent)) + geom_boxplot() + scale_fill_manual(values = pal)
 ```
-
-![](analise_files/figure-gfm/plotando%20a%20populacao%20por%20continente%20em%20boxplot%20com%20cores%20diferentes-1.png)<!-- -->
 
 # Com a paleta customizada
 
 ``` r
-ggplot(pop.mundial, aes(x = Continent, y = Population, fill = Continent)) + geom_boxplot() + scale_fill_manual(values = pal.custom)
+p2 <- ggplot(pop.mundial, aes(x = Continent, y = Population, fill = Continent)) + geom_boxplot() + scale_fill_manual(values = pal.custom)
 ```
 
-![](analise_files/figure-gfm/plotando%20a%20populacao%20por%20continente%20em%20boxplot%20com%20cores%20diferentes%20e%20paleta%20customizada-1.png)<!-- -->
+``` r
+ggplot(pop.mundial, aes(x = Date, y = Population, color = Continent)) + geom_point()
+```
+
+![](analise_files/figure-gfm/dispersao%20de%20pontos%20entre%20divulgacao%20e%20tamanho%20populacional-1.png)<!-- -->

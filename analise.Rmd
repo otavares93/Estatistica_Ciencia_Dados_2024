@@ -75,7 +75,7 @@ kable(pop.mundial.agg)
 # Vamos construir alguns uns plots?
 
 ```{r plotandodadospopulacionais, echo=T, include=T}
-ggplot(pop.mundial %>% dplyr::select(Country_Dependency, Population, Continent), aes(x = Country_Dependency, y = Population, fill = Continent)) + geom_bar(stat = "identity") + xlab("Países") + ylab("População") + labs(title = "População dos países top-10 do mundo", subtitle = "Coleta web para análise com ggplot", caption = "Fonte: wikipedia") + theme_minimal()
+ggplot(pop.mundial %>% dplyr::select(Country_Dependency, Population, Continent), aes(x = Country_Dependency, y = Population, fill = Continent)) + geom_bar(stat = "identity") + xlab("Países") + ylab("População") + labs(title = "População dos países top-10 do mundo", subtitle = "Coleta web para análise com ggplot", caption = "Fonte: Wikipedia") + theme_minimal()
 ```
 
 # Quantos países temos por continente?
