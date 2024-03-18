@@ -93,6 +93,11 @@ summarytools::ctable(x = factor(salarios$n_filhos),
        y = salarios$estado_civil, 
        prop = "t") 
 ```
+```{r tabela contigencia estado civil n_filhos, echo = TRUE}
+#Convertendo solteiro para 0 e casado para 1 com variável binária e calculando o coeficiente de correlação ponto-bisserial
+cor.test(x = salarios$salario, 
+       y = as.numeric(as.character(factor(salarios$estado_civil, levels = c("solteiro","casado"), labels = c(0,1)))))
+```
 
 
 ```{r heatmat estado civil e instrucao, echo = TRUE}

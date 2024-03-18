@@ -1,0 +1,103 @@
+---
+title: "Análise descritiva de uma base de dados"
+author: "Otto Tavares"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Introdução
+
+Na Aula 8, temos o objetivo de abrir uma base de dados e dar os primeiros passos em análise estatística dessa base.
+
+Como sempre, o primeiro passo é importar as bibliotecas que serão utilizadas para análise, como tydiverse, summarytools e dlookr.
+
+```{r importando bibliotecas, echo = TRUE}
+library(tidyverse)
+library(dlookr)
+library(summarytools)
+library(readxl)
+library(knitr)
+```
+
+A base trabalhada nesta aula, será a base de dados hipotética disponbilizada no livro texto dos autores Bussab e Moretim. Vamos importá-la e imprimir as primeiras observações para conhecimento das variáveis.
+
+```{r importando dados, echo = FALSE}
+salarios <- readxl::read_excel("./dados_auxiliares/dados_bussab_m.xlsx")
+```
+
+```{r imprimindo as variaveis, echo = TRUE}
+kable(head(salarios))
+```
+
+###Identificando os tipos de cada variável na base
+
+Para identificar os tipos de cada variável na base, vamos utilizar a função diagnose do pacote dlookr e reportar o tipo de cada um para melhor trabalharmos os dados.
+
+```{r identificando os tipos de variáveis, echo = TRUE}
+salarios %>% dlookr::diagnose()
+```
+
+É fácil ver que na base há três variáveis qualitativas, sendo as variáveis Estado Civil e região nominais, enquanto a variável Grau de Instrução é ordinal.
+
+Sobre as variáveis quantitativas, temos número de filhos e idade com variáveis discretas, equanto a variável salário é contínua.
+
+##Análise de frequências de variáveis qualitativas
+
+A variável região é uma das variáveis qualitativas nominais da base, sendo uma variável interessante para extraírmos as frequências. Para esse caso, vamos utilizar a função freq() do pacote summarytools
+
+```{r frequencias de uma variavel, echo = TRUE}
+salarios %>% dplyr::select(regiao) %>% summarytools::freq()
+```
+
+Nas colunas Freq, temos a frequência absoluta, mostrando um grau de bastante homogeneidade entre as classes. Padrão esse, que é confirmado com a coluna Valid, que apresenta as frequências relativas de cada opção de região. 
+
+Podemos fazer a mesma análise para os dados de estado civil, os quais podemos estar interessados em buscar evidência se há mais funcionários casados ou solteiros na empresa. A seguir, temos a tabela destas proporções, onde é perceptível que há maior proporção de funcionários casados.
+
+
+```{r frequencias da variavel ecivil, echo = TRUE}
+salarios %>% dplyr::select(estado_civil) %>% summarytools::freq()
+```
+
+É importante destacar, que lemos a coluna Valid sem nos preocupar nestes casos, pois não há dados faltantes para nenhumas das duas variáveis.
+
+
+Por fim, podemos criar tabelas de frequências para uma variável quantitativa discreta, como é o caso do número de filhos dos funcionários da empresa. 
+
+```{r frequencias da variavel nfilhos, echo = TRUE}
+salarios %>% dplyr::select(n_filhos) %>% summarytools::freq()
+```
+
+Como há dados faltantes para essa variável, é importante o analista determinar qual o espaço amostral está interessado em focar sua análise. 
+
+A fim de ser comparável às análises pregressas, é importante que as frequências absoluta e relativa do total de dados seja considerada, isto é, leitura da coluna Total, a fim de manter o mesmo espaço amostral.
+
+Caso, ele esteja interessado em analisar apenas os dados válidos, ele pode redefinir o espaço amostral, ler apenas a coluna Valid, porém recalculando as tabelas anteriores, considerando os indivíduos apenas com dados preenchidos para a variável filhos.
+
+```{r tabela contigencia grau de instrucao regiao, echo = TRUE}
+summarytools::ctable(x = salarios$Grau_de_instrucao, 
+       y = salarios$regiao, 
+       prop = "t") 
+```
+
+```{r tabela contigencia estado civil n_filhos, echo = TRUE}
+summarytools::ctable(x = factor(salarios$n_filhos), 
+       y = salarios$estado_civil, 
+       prop = "t") 
+```
+
+# Calculando o teste de correlação ponto bisserial
+
+Para realizar o cálculo dessa correlação, devemos converter a variável categória que estava em texto para binária (0,1). Fizemos através do pacote básico, transformando convertendo para binário através da função factor e transformando em numérica, pois a função recebe as variáveis em seu formato numérico.
+
+```{r correlação ponto bisserial, echo = TRUE}
+#Convertendo solteiro para 0 e casado para 1 com variável binária e calculando o coeficiente de correlação ponto-bisserial
+cor.test(x = salarios$salario, 
+       y = as.numeric(as.character(factor(salarios$estado_civil, levels = c("solteiro","casado"), labels = c(0,1)))))
+```
+
+Reparem que, embora tenha calculado uma relação entre as categórias de estado civil e salário, apontando para uma fraca relação entre ser casado e ganhar maiores salários, essa valor não é significativo ao nível de 95% (papo para futuro, mas é possível checar pelo p-valor e pelo intervalo de confiança).
